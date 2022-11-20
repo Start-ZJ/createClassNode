@@ -46,7 +46,6 @@ class HomeController extends Controller {
       isHaveUser: !!findUser.length,
       userData: findUser
     }
-    console.log('findUser---->', backBody)
     this.ctx.body = backBody
   }
 }

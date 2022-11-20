@@ -34,13 +34,13 @@ module.exports = appInfo => {
   config.security = {
     csrf: {
       enable: false,
-      ignoreJSON:true
-    },
-    cors: {
-      origin:'*',
-      allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH,OPTIONS'
+      ignoreJSON: true
     }
   }
+  config.cors = {
+    origin: '*',//域名+端口 或者  *(全匹配)
+    allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH'
+  };
 
   return {
     ...config,
