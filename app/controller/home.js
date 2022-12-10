@@ -14,17 +14,21 @@ class HomeController extends Controller {
     const params = ctx.request.body;
     let md5PassWord = utility.md5(params.passWord);
     params.passWord = md5PassWord;
-    let backBody = {
-      code: '0',//'0'->账号重复，'1'->注册成功
-      message: '注册账号与已有账号重复，请重新输入账号！'
-    }
-    const findUser = await ctx.service.user.findUser(params);
-    if (!findUser.length) {
+    const findUser = await ctx.service.user.userLoginFind(params);
+    let backBody = {};
+    if (!!findUser.length) {
+      backBody = {
+        code: '1',//'1'->账号重复，'0'->注册成功
+        message: '注册账号与已有账号重复，请重新输入账号！'
+      }
+    } else {
       const addUser = await ctx.service.user.addUser(params);
-      if (addUser.affectedRows === 1) {
+      const findUserAgain = await ctx.service.user.userLoginFind(params);
+      if (!!addUser) {
         backBody = {
-          code: '1',
-          message: '账号注册成功！'
+          code: '0',
+          message: '注册成功！',
+          userData: findUserAgain
         }
       }
     }

@@ -10,11 +10,6 @@ class UserService extends Service {
     return addUser;
   }
   /** @descript 用户查询接口 */
-  async findUser(params) {
-    const findUser = await this.app.mysql.query('select * from userbase where userName=?', [params.userName]);
-    return findUser;
-  }
-  /** @descript 用户查询接口 */
   async userLoginFind(params) {
     const findUser = await this.app.mysql.query('select * from userbase where userName=? and userPassWord=?', [params.userName, params.passWord]);
     return findUser;
