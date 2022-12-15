@@ -14,6 +14,11 @@ class UserService extends Service {
     const findUser = await this.app.mysql.query('select * from userbase where userName=? and userPassWord=?', [params.userName, params.passWord]);
     return findUser;
   }
+  /** @descript 查询阿里云验证码的key */
+  async smsKeyFind() {
+    const findUser = await this.app.mysql.query('select * from AccessKey_List where admin=?', ['StartZJ']);
+    return findUser;
+  }
 }
 
 module.exports = UserService;
