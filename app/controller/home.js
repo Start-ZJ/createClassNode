@@ -2,7 +2,7 @@
 
 const Controller = require('egg').Controller;
 const utility = require("utility")//密码加密
-const SMSClient = require('@alicloud/sms-sdk');//阿里云的验证码模块
+const Core = require('@alicloud/pop-core');
 class HomeController extends Controller {
   /** 
    * @descript 用户注册接口
@@ -56,7 +56,7 @@ class HomeController extends Controller {
    * @descript 用户验证码生成
    * @params mobile 手机号
    * */
-  async userVerificationCodeGeneration(){
+  async userVerificationCodeGeneration() {
     const { ctx } = this;
     const params = ctx.request.body;
     const smsKey = await ctx.service.user.smsKeyFind();
@@ -64,52 +64,38 @@ class HomeController extends Controller {
     const accessKeyId = smsKey[0].AccessKeyID;// AccessKey ID
     const secretAccessKey = smsKey[0].AccessKeySecret;// AccessKey Secret
     const signName = '创意班博客验证码'; // 签名名称
-    const templateCode = "SMS_154950909";// 短信模板code
+    const templateCode = "SMS_264850059";// 短信模板code
     const mobile = params.mobile;//手机号
-    const smsClient = new SMSClient({ accessKeyId, secretAccessKey });// 初始化sms_client    
-    return
-    // 开始发送短信
-    smsClient.sendSMS({
-      PhoneNumbers: mobile,
-      SignName: signName, //签名名称 前面提到要准备的
-      TemplateCode: templateCode, //模版CODE  前面提到要准备的
-      TemplateParam: `{"code":'${smsCode}'}`, // 短信模板变量对应的实际值，JSON格式
-    }).then(result => {
-      console.log("result：", result)
-      let { Code } = result;
+    const client = new Core({
+      accessKeyId: accessKeyId,
+      accessKeySecret: secretAccessKey,
+      endpoint: 'https://dysmsapi.aliyuncs.com',
+      apiVersion: '2017-05-25'
+    });
+    let backBody = {};
+    const requestOption = { method: 'POST', formatParams: false };
+    client.request('SendSms', {
+      "PhoneNumbers": mobile,//接收短信的手机号码
+      "SignName": signName,//短信签名名称
+      "TemplateCode": templateCode, //短信模板CODE
+      "TemplateParam": JSON.stringify({ code: smsCode })
+    }, requestOption).then(result => {
+      const { Code } = result;
       if (Code == 'OK') {
-        res.json({
+        backBody = {
           code: 0,
-          msg: 'success',
+          msg: '验证码发送成功！',
           sms: smsCode
-        })
-        console.log("result:", result);
+        }
       }
+      this.ctx.body = backBody
     }).catch(err => {
-      console.log("报错：", err);
-      res.json({
+      backBody = {
         code: 1,
         msg: 'fail: ' + err.data.Message
-      })
-    })
-    // let backBody = {};
-    // if (!!findUser.length) {
-    //   backBody = {
-    //     code: '1',//'1'->账号重复，'0'->注册成功
-    //     message: '注册账号与已有账号重复，请重新输入账号！'
-    //   }
-    // } else {
-    //   const addUser = await ctx.service.user.addUser(params);
-    //   const findUserAgain = await ctx.service.user.userLoginFind(params);
-    //   if (!!addUser) {
-    //     backBody = {
-    //       code: '0',
-    //       message: '注册成功！',
-    //       userData: findUserAgain
-    //     }
-    //   }
-    // }
-    // this.ctx.body = backBody
+      }
+      this.ctx.body = backBody
+    });
   }
 }
 
