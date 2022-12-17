@@ -5,7 +5,5 @@
  */
 module.exports = app => {
   const { router, controller } = app;
-  require('./router/index')(app)
-  require('./router/home')(app)
-  require('./router/file')(app)
+  router.post('/file/addFile', controller.file.addFile);//用户注册
 };
